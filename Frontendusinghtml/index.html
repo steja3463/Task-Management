@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Authentication -->
+        <!-- Auth -->
         <div id="auth-section">
             <div class="tabs">
                 <button class="tab-btn active" data-target="login-form">Login</button>
@@ -35,11 +35,11 @@
             </div>
         </div>
         
-        <!-- Task Management -->
+        <!-- Tasks -->
         <div id="task-section" class="hidden">
             <header>
-                <h1>Task Manager</h1>
-                <div class="user-bar">
+                <h2>Task Manager</h2>
+                <div>
                     <span id="user-name"></span>
                     <button id="logout-btn" class="btn-small">Logout</button>
                 </div>
@@ -47,7 +47,6 @@
             
             <div class="content">
                 <aside>
-                    <h2>Create Task</h2>
                     <form id="task-form">
                         <input type="hidden" id="task-id">
                         <input type="text" id="task-title" placeholder="Task Title" required>
@@ -60,16 +59,16 @@
                         <input type="date" id="task-due-date">
                         <div class="form-actions">
                             <button type="submit" class="btn">Save</button>
-                            <button type="button" id="cancel-btn" class="btn-alt hidden">Cancel</button>
+                            <button type="button" id="cancel-btn" class="btn btn-alt hidden">Cancel</button>
                         </div>
                     </form>
                 </aside>
                 
                 <main>
                     <div class="list-header">
-                        <h2>My Tasks</h2>
+                        <h2>Tasks</h2>
                         <select id="status-filter">
-                            <option value="all">All Tasks</option>
+                            <option value="all">All</option>
                             <option value="pending">Pending</option>
                             <option value="in-progress">In Progress</option>
                             <option value="completed">Completed</option>
@@ -80,7 +79,6 @@
             </div>
         </div>
     </div>
-    
     <script src="app.js"></script>
 </body>
 </html>
