@@ -1,154 +1,67 @@
-// src/components/tasks/TaskForm.js
-import React, { useState, useContext, useEffect } from 'react';
+// src/components/tasks/TaskItem.js
+import React, { useContext } from 'react';
 import { TaskContext } from '../../context/TaskContext';
 
-const TaskForm = () => {
-  const taskContext = useContext(TaskContext);
-  const { addTask, updateTask, currentTask, clearCurrent, error } = taskContext;
-
-  const [task, setTask] = useState({
-    title: '',
-    description: '',
-    status: 'pending',
-    dueDate: ''
-  });
-
-  const [formError, setFormError] = useState('');
-
-  useEffect(() => {
-    if (currentTask !== null) {
-      setTask({
-        ...currentTask,
-        dueDate: currentTask.dueDate ? new Date(currentTask.dueDate).toISOString().split('T')[0] : ''
-      });
-    } else {
-      setTask({
-        title: '',
-        description: '',
-        status: 'pending',
-        dueDate: ''
-      });
+const TaskItem = ({ task }) => {
+  const { deleteTask, setCurrent } = useContext(TaskContext);
+  
+  const { _id, title, description, status, dueDate } = task;
+  
+  // Get status badge color
+  const getStatusBadgeClass = () => {
+    switch (status) {
+      case 'pending':
+        return 'bg-warning';
+      case 'in-progress':
+        return 'bg-info';
+      case 'completed':
+        return 'bg-success';
+      default:
+        return 'bg-secondary';
     }
-
-    if (error) {
-      setFormError(error);
-    }
-  }, [currentTask, error]);
-
-  const { title, description, status, dueDate } = task;
-
-  const onChange = e => {
-    setTask({ ...task, [e.target.name]: e.target.value });
   };
-
-  const onSubmit = e => {
-    e.preventDefault();
-    setFormError('');
-
-    if (title === '') {
-      setFormError('Please enter a title');
-      return;
-    }
-
-    if (currentTask === null) {
-      addTask(task);
-    } else {
-      updateTask(currentTask._id, task);
-    }
-
-    clearAll();
+  
+  // Format date
+  const formatDate = (date) => {
+    if (!date) return 'No due date';
+    return new Date(date).toLocaleDateString();
   };
-
-  const clearAll = () => {
-    clearCurrent();
-  };
-
+  
   return (
-    <div className="card mb-4">
+    <div className="card mb-3">
       <div className="card-body">
-        <h3 className="card-title text-center">
-          {currentTask ? 'Edit Task' : 'Add Task'}
-        </h3>
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="card-title mb-0">{title}</h5>
+          <span className={`badge ${getStatusBadgeClass()}`}>
+            {status === 'in-progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        </div>
         
-        {formError && (
-          <div className="alert alert-danger" role="alert">
-            {formError}
-          </div>
+        {description && (
+          <p className="card-text mt-2">{description}</p>
         )}
         
-        <form onSubmit={onSubmit}>
-          <div className="mb-3">
-            <label htmlFor="title" className="form-label">Title</label>
-            <input
-              type="text"
-              className="form-control"
-              id="title"
-              name="title"
-              placeholder="Task Title"
-              value={title}
-              onChange={onChange}
-            />
-          </div>
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <small className="text-muted">Due: {formatDate(dueDate)}</small>
           
-          <div className="mb-3">
-            <label htmlFor="description" className="form-label">Description</label>
-            <textarea
-              className="form-control"
-              id="description"
-              name="description"
-              placeholder="Task Description"
-              value={description || ''}
-              onChange={onChange}
-              rows="3"
-            ></textarea>
-          </div>
-          
-          <div className="mb-3">
-            <label htmlFor="status" className="form-label">Status</label>
-            <select
-              className="form-select"
-              id="status"
-              name="status"
-              value={status}
-              onChange={onChange}
+          <div>
+            <button
+              className="btn btn-sm btn-outline-primary me-2"
+              onClick={() => setCurrent(task)}
             >
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-          
-          <div className="mb-3">
-            <label htmlFor="dueDate" className="form-label">Due Date</label>
-            <input
-              type="date"
-              className="form-control"
-              id="dueDate"
-              name="dueDate"
-              value={dueDate || ''}
-              onChange={onChange}
-            />
-          </div>
-          
-          <div className="d-grid gap-2">
-            <button type="submit" className="btn btn-primary">
-              {currentTask ? 'Update Task' : 'Add Task'}
+              Edit
             </button>
-            
-            {currentTask && (
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={clearAll}
-              >
-                Cancel
-              </button>
-            )}
+            <button
+              className="btn btn-sm btn-outline-danger"
+              onClick={() => deleteTask(_id)}
+            >
+              Delete
+            </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default TaskForm;
+export default TaskItem;

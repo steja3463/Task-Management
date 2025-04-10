@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
+import setAuthToken from '../utils/setAuthToken';
 
 export const TaskContext = createContext();
 
@@ -12,6 +13,14 @@ export const TaskProvider = ({ children }) => {
   const [error, setError] = useState(null);
   
   const { isAuthenticated } = useContext(AuthContext);
+
+  // Ensure auth token is set before each request
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setAuthToken(token);
+    }
+  }, []);
 
   // Load tasks when authenticated
   useEffect(() => {
@@ -27,6 +36,12 @@ export const TaskProvider = ({ children }) => {
   const getTasks = async () => {
     try {
       setLoading(true);
+      // Ensure token is set before request
+      const token = localStorage.getItem('token');
+      if (token) {
+        setAuthToken(token);
+      }
+      
       const res = await axios.get('http://localhost:5000/api/tasks');
       setTasks(res.data);
       setLoading(false);
@@ -40,6 +55,12 @@ export const TaskProvider = ({ children }) => {
   // Add task
   const addTask = async (task) => {
     try {
+      // Ensure token is set before request
+      const token = localStorage.getItem('token');
+      if (token) {
+        setAuthToken(token);
+      }
+      
       const res = await axios.post('http://localhost:5000/api/tasks', task);
       setTasks([res.data.task, ...tasks]);
       setError(null);
@@ -53,6 +74,12 @@ export const TaskProvider = ({ children }) => {
   // Update task
   const updateTask = async (taskId, updatedTask) => {
     try {
+      // Ensure token is set before request
+      const token = localStorage.getItem('token');
+      if (token) {
+        setAuthToken(token);
+      }
+      
       const res = await axios.put(`http://localhost:5000/api/tasks/${taskId}`, updatedTask);
       
       setTasks(
@@ -70,17 +97,29 @@ export const TaskProvider = ({ children }) => {
   };
 
   // Delete task
-  const deleteTask = async (taskId) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/tasks/${taskId}`);
-      
-      setTasks(tasks.filter(task => task._id !== taskId));
-      setError(null);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error deleting task');
-      throw err;
+  // Delete task - improved error handling
+const deleteTask = async (taskId) => {
+  try {
+    // Ensure token is set before request
+    const token = localStorage.getItem('token');
+    if (token) {
+      setAuthToken(token);
     }
-  };
+    
+    console.log('Attempting to delete task with ID:', taskId);
+    
+    // Add debugging info to see what's being sent
+    const res = await axios.delete(`http://localhost:5000/api/tasks/${taskId}`);
+    console.log('Delete response:', res.data);
+    
+    setTasks(tasks.filter(task => task._id !== taskId));
+    setError(null);
+  } catch (err) {
+    console.error('Delete error details:', err.response?.data || err.message);
+    setError(err.response?.data?.message || `Error deleting task: ${err.message}`);
+    // Don't throw the error so the UI doesn't crash
+  }
+};
 
   // Clear current task
   const clearCurrent = () => {
